@@ -58,29 +58,47 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
     const {id} = req.params
     const {name, description, completed} = req.body
-    if(!Projects.get(id)){
-        res.status(204).json({
-            message: 'No project with that id could be found'
-        })
-    }
-    else if (!req.body) {
-        res.status(400).json({
-            message: 'Please include all fields'
-        })
+
+    
+    if(!name || !description || !completed){
+        res.status(400).json({message: "Please provide all data"})
     }
     else {
         Projects.update(id, req.body)
-        .then(data => {
-            res.status(201).json(data)
+        .then(project => {
+            Projects.get(project.id)
+        })
+        .then(update => {
+            res.status(201).json(update)
+            Projects.get(id)
         })
         .catch(error => {
             console.log(error)
-            res.status(500)
+            res.status(500).json({message: 'server error'})
         })
-
     }
+
+
     
 
+})
+
+router.delete('/:id', async (req, res) => {
+    const {id} = req.params
+    try{
+        const projectToDelete = await Projects.get(id)
+        if(!projectToDelete){
+            res.status(404).json({message: 'post not found'})
+        }
+        else {
+            await this.Projects.remove(id)
+            res.status(200).res.json(projectToDelete)
+        }
+    }
+    catch (error){
+        console.log(error)
+        res.status(500).json({message: "server error"})
+    }
 })
 
 
