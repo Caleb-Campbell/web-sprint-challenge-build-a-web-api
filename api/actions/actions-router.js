@@ -4,6 +4,7 @@ const router = express.Router()
 
 // model functions imported for use
 const Action = require('./actions-model')
+const {checkAction, checkActionId} = require('./projects-middleware')
 
 router.get('/', (req, res) => {
     Action.get()
@@ -35,27 +36,19 @@ router.get('/:id', (req, res) => {
 })
 
 router.post('/', (req, res) => {
-    const {notes, description, project_id} = req.body
-
-    if(!notes || !description || !project_id){
-        res.status(400)
-    }
-    else {
-        Action.insert(req.body)
-        .then(action => {
-            if(!notes || !description || !project_id){
-                res.status(400).json({message: "Please complete all fields"})
-            }
-            else {
-                res.status(201).json(action)
-            }
-        })
-        .catch(error => {
-            console.log(error)
-            res.status(500)
-        })
-    }
-    
+if(!req.body.notes || !req.body.description || !req.body.project_id){
+    res.status(400)
+}
+else {
+    Action.insert(req.body)
+    .then(result => {
+    res.status(200).json(result)
+})
+.catch(error => {
+    console.log(error)
+    res.status(500)
+})
+}
 })
 
 
