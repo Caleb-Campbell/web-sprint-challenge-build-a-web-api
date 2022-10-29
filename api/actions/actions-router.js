@@ -17,22 +17,8 @@ router.get('/', (req, res) => {
     })
 })
 
-router.get('/:id', (req, res) => {
-    const {id} = req.params
+router.get('/:id', checkActionId, (req, res) => {
     
-    Action.get(id)
-    .then(action => {
-        if(!action){
-            res.status(404).json({message: 'not found'})
-        }
-        else {
-            res.status(200).json(action)
-        }
-    })
-    .catch(error => {
-        console.log(error)
-        res.status(500)
-    })
 })
 
 router.post('/', (req, res) => {
