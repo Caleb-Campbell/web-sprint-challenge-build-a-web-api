@@ -33,15 +33,24 @@ router.post("/", checkProjectId, checkProject, async (req, res, next) => {
 		.catch(next);
 });
 
-router.put("/:id", checkProjectId, checkProjectWithCompleted, async (req, res, next) => {
-	const {id} = req.params
-    try {
-		await Projects.update(id, req.body);
-		res.status(200).json(req.body);
-	} catch (error) {
-		next(error);
-	}
-});
+router.put("/:id",  (req, res) => {
+    const {name, description, completed} = req.body
+    const {id} = req.params
+    if(!name || !description || !completed){
+        res.status(400).json(req.body)
+    }
+
+    const changes = {name, description, completed}
+    Projects.update(id, changes)
+    .then(project => res.status(200).json(project))
+    .then(project => {
+        return project
+    })
+    .catch(error => console.log(error))
+    
+  });
+
+
 
 router.delete("/:id", checkProjectId, (req, res, next) => {
 	Projects.remove(req.params.id)
