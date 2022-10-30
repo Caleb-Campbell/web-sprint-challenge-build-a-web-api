@@ -1,48 +1,62 @@
 // Write your "actions" router here!
-const express = require('express')
-const router = express.Router()
+const express = require("express");
+const Actions = require("./actions-model");
+const router = express.Router();
+const {
+  checkActionId,
+  checkAction,
+  checkActionIsReal,
+  checkActionWithCompleted,
+} = require("./actions-middlware");
 
-// model functions imported for use
-const Action = require('./actions-model')
-const {checkAction, checkActionId} = require('./projects-middleware')
+router.get("/", async (req, res, next) => {
+    try {
+        const actions = await Actions.get();
+        res.json(actions)
+    } catch (err) {
+        res.status(500).json({
+            message: "There are no actions to return"
+        })
+    }
+});
 
-router.get('/', (req, res) => {
-    Action.get()
-    .then(actions => {
-        res.status(200).json(actions)
-    })
-    .catch(error => {
-        console.log(error)
-        res.status(500)
-    })
+
+router.get("/:id", checkActionId, async (req, res, next) => {
+    await Actions.get(req.params.id)
+    .then((action) => res.json(action))
+    .catch(next)
+});
+
+
+
+router.post("/", checkAction, async (req, res, next) => {
+  const newAction = req.body;
+  Actions.insert(newAction)
+    .then((action) => res.json(action))
+    .catch(next);
+});
+
+
+router.put("/:id", checkActionId, checkAction, (req, res, next) => {
+  Actions.update(req.params.id, req.body)
+    .then((project) => res.json(project))
+    .catch(next);
+});
+
+
+
+router.delete("/:id", async (req, res, next) => {
+    Actions.remove(req.params.id)
+    .then((action) => res.json())
+    .catch(next)
 })
 
-router.get('/:id', checkActionId, (req, res) => {
-    
-})
 
-router.post('/', (req, res) => {
-if(!req.body.notes || !req.body.description || !req.body.project_id){
-    res.status(400)
-}
-else {
-    Action.insert(req.body)
-    .then(result => {
-    res.status(200).json(result)
-})
-.catch(error => {
-    console.log(error)
-    res.status(500)
-})
-}
-})
+router.use((err, req, res, next) => {
+  res.status(err.status || 500).json({
+    message: "server error"
+  });
+});
 
 
-
-
-
-
-
-
-
-module.exports = router
+module.exports = router;

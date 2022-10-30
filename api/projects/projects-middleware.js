@@ -1,33 +1,46 @@
 // add middlewares here related to projects
-const Projects = require('./projects-model')
+const { get } = require("./projects-model");
 
-async function checkProjectId (req, res, next) {
-    const {id} = req.params
-    try {
-        const project = await Projects.get(id)
-        if(!project){
-            res.status(404).json({message: 'does not exist'})
-        }
-        else {
-            next()
-        }
-    }
-    catch (error) {
-        next(error)
+async function checkProjectId(req, res, next) {
+  get(req.params.id)
+    .then((project) => {
+      if (project) {
+        req.project = project;
+        next();
+      } else {
+        next({
+          status: 404,
+          message: "user not found",
+        });
+      }
+    })
+    .catch(next);
+}
+
+async function checkProject (req, res, next) {
+    if(!req.body.name || !req.body.description) {
+            next({
+            status: 400,  
+            message: "please complete all fields"
+          });    
+    } else {
+        next(); 
     }
 }
 
-function checkProject (req, res, next){
-    const {name, description } = req.body
-    if(!name || !description){
-        res.status(400).json({message: 'include all fields'})
-    }
-    else {
-        next()
-    }
+async function checkProjectWithCompleted (req, res, next) {
+  if (!req.body.name || !req.body.description || !req.body.completed) {
+    res.status(400).json({
+      message: "You cannot post this new project",
+    });
+  } else {
+    next();
+  }
 }
+
 
 module.exports = {
-    checkProjectId,
-    checkProject
-}
+  checkProjectId,
+  checkProject,
+  checkProjectWithCompleted,
+};

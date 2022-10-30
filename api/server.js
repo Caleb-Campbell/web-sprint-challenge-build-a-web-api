@@ -12,10 +12,10 @@ server.use('/api/projects', projectRouter)
 server.use('/api/actions', actionRouter)
 
 // default message
-server.get('/', (req, res) => {
-    res.json({
-        message: 'Welcome to the Express Server'
-    })
-})
+// server.get('/', (req, res) => {
+//     res.json({
+//         message: 'Welcome to the Express Server'
+//     })
+// })
 
 module.exports = server;
